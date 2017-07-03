@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<title>Duration Demo</title>
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.hidden {
+	display: none;
+}
+.coin-toss {
+	position: relative;
+	background: url('https://s3.amazonaws.com/content.expresso.com/graphics/CoinToss_150.png') no-repeat left top;
+}
+.coin-toss svg {
+	border: 1px solid #000;
+	opacity: 0.7;
+	position: relative;
+	left: -5px;
+	z-index: 0;
+}
+.minutes {
+	position: absolute;
+	top: +60px;
+	left: 0px;
+	z-index:5;
+	text-align: center;
+	display: inline-block;
+	color: #fff;
+	line-height: 30px;
+	width: 150px;
+	height: 30px;
+	font-size:3.0em;
+	text-shadow:3px 3px 3px #000;
+}
+</style>
+</head>
+<body>
+<div class="coin-toss hidden">
+<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg">
+<path class="arc" fill="#fff"/>
+</svg>
+<span id="minutes" class="minutes"></span>
+</div>
+<div id="chases">
+</div>
+<script>
+"use strict";
+// Thanks to: https://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
+function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+	var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
+
+	return {
+		x: centerX + (radius * Math.cos(angleInRadians)),
+		y: centerY + (radius * Math.sin(angleInRadians))
+	};
+}
+
+function describeArc(x, y, radius, startAngle, endAngle){
+
+	var start = polarToCartesian(x, y, radius, endAngle);
+	var end = polarToCartesian(x, y, radius, startAngle);
+
+	var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+	var d = [
+		"M", start.x, start.y, 
+		"A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+		"L", radius, radius, 'Z'
+	].join(" ");
+
+	return d;       
+}
+var i,angle,slice,start,points,minutes,coinTossSource,coinTossNode,chases;
+chases = document.getElementById("chases");
+coinTossSource = document.querySelector(".coin-toss");
+points = 9.0;
+slice = 360 / points;
+start = points - 1.0;
+for (i = 0; i <= start; ++i) {
+	angle = (slice * i) + slice;
+	coinTossNode = coinTossSource.cloneNode(true);
+	coinTossNode.classList.remove("hidden");
+	coinTossNode.querySelector(".arc").setAttribute("d", describeArc(80, 80, 80, angle, 360));
+	minutes = (i * 5) + 5;
+	coinTossNode.querySelector(".minutes").textContent = minutes;
+	chases.appendChild(coinTossNode);
+}
+</script>
+</body>
+</html>
